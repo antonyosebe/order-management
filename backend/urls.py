@@ -18,15 +18,23 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from products.views import CategoryViewSet, ProductViewSet
+from customers.views import CustomerViewSet
+from orders.views import OrderViewSet
+
+    
+
+    
 
 
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet)
 router.register(r'products', ProductViewSet)
-
+router.register(r'customers', CustomerViewSet)
+router.register(r'orders', OrderViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')), 
 ]
