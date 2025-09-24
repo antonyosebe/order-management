@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 import uuid
 import random
 
@@ -34,7 +34,8 @@ class Order(models.Model):
     subtotal = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.00'))]
+        validators=[MinValueValidator(Decimal('0.00'))],
+        default=Decimal('0.00')
     )
     tax_amount = models.DecimalField(
         max_digits=10,
@@ -51,7 +52,8 @@ class Order(models.Model):
     total_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.01'))]
+        default=Decimal('0.00'),
+        validators=[MinValueValidator(Decimal('0.00'))]
     )
 
     shipping_address = models.TextField()
@@ -76,8 +78,21 @@ class Order(models.Model):
         if not self.order_number:
             self.order_number = f"ORD{random.randint(10000000, 99999999)}"
 
-        if not self.total_amount:
-            self.total_amount = self.subtotal + self.tax_amount + self.shipping_cost
+        # Ensure subtotal is always rounded to nearest shilling (KES)
+        if self.subtotal is None:
+            self.subtotal = Decimal('0.00')
+        self.subtotal = self.subtotal.quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+
+        if self.shipping_cost is None:
+            self.shipping_cost = Decimal('0.00')
+
+        # Auto-calculate VAT (16%)
+        self.tax_amount = (self.subtotal * Decimal('0.16')).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+
+        # Recalculate total (subtotal + VAT + shipping)
+        self.total_amount = (self.subtotal + self.tax_amount + self.shipping_cost).quantize(
+            Decimal('1'), rounding=ROUND_HALF_UP
+        )
 
         super().save(*args, **kwargs)
 

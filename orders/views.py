@@ -11,7 +11,6 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # staff can see all orders, users only see their own
         user = self.request.user
         if user.is_staff:
             return Order.objects.all()

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Order</title>
+</head>
+<body>
+    <h2>New Order #{{ order.order_number }}</h2>
+    <p>Customer: {{ order.customer.first_name }} {{ order.customer.last_name }}</p>
+    <p>Total: KES {{ order.total_amount }}</p>
+    <p>Placed at: {{ order.created_at }}</p>
+</body>
+</html>
+
+
+
